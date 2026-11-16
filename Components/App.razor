@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@*for interactivity*@
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -9,11 +12,13 @@
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="ExpenseTracker.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <HeadOutlet />
+    @*for interactivity*@
+    <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
 <body>
-    <Routes />
+    @*for interactivity*@
+    <Routes @rendermode="InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
 </body>
 
