@@ -8,6 +8,7 @@
 <h3>Total spent: @expenses.Sum(e => e.Amount).ToString("C")</h3>
 
 
+@*Adding expenses (Create)*@
 <h3>Add Expense</h3>
 
 <div>
@@ -30,12 +31,14 @@
 	<input type="date" @bind="newExpense.Date" />
 </div>
 
+@*add button*@
 <button @onclick="AddExpense">Add</button>
 @if (!string.IsNullOrEmpty(errorMessage))
 {
 	<p style="color: red">@errorMessage</p>
 }
 
+@*editing expenses (update)*@
 @*if expense exists, show edit expense ui*@
 @if (editingExpense != null)
 {
@@ -64,6 +67,8 @@
 	<button @onclick="SaveChanges">Save Changes</button>
 	<button @onclick="CancelEdit">Cancel</button>
 }
+
+
 <table class="table">
 
 	<thead>
@@ -84,7 +89,10 @@
 				<td>@expense.Amount.ToString("C")</td>
 				<td>@expense.Category</td>
 				<td>@expense.Date.ToShortDateString()</td>
-				<td><button @onclick="() => EditExpense(expense.Id)">Edit</button></td>
+				<td>
+					<button @onclick="() => EditExpense(expense.Id)">Edit</button>
+					<button @onclick="() => DeleteExpense(expense.Id)">Delete</button>
+				</td>
 			</tr>
 		}
 		
@@ -92,6 +100,8 @@
 </table>
 
 @code {
+
+	@inject IJSRuntime JS
 	private string errorMessage = "";
 
 	private int nextExpenseId = 3;
@@ -194,5 +204,21 @@
 	{
 		//since the edit screen only shows when !=null, setting =null will remove it without saving changes
 		editingExpense = null;
+	}
+
+	private async Task DeleteExpense(int id)
+	{
+		bool confirmed = await JS.InvokeAsync<bool>(
+			"confirm",
+			"Are you sure you want to delete?"
+		);
+
+		if (confirmed)
+		{
+			//remove all from expenses with matching id (unique ids)
+			expenses.RemoveAll(e => e.Id == id);
+		}
+
+			
 	}
 }
