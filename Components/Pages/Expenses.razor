@@ -206,8 +206,14 @@
 		editingExpense = null;
 	}
 
+
+	//task = async operation (waiting for javascript operation to finish b4 continuing)
+	//dependddency injection
 	private async Task DeleteExpense(int id)
-	{
+	{	
+		//inject IJSRuntime service to allow C# to call Javascript in browser
+		//InvokeAsync calls JS function async and tells C# to expect bool as return
+		//confirm is the JS function being calleddd
 		bool confirmed = await JS.InvokeAsync<bool>(
 			"confirm",
 			"Are you sure you want to delete?"
