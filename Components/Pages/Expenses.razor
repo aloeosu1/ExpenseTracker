@@ -35,6 +35,35 @@
 {
 	<p style="color: red">@errorMessage</p>
 }
+
+@*if expense exists, show edit expense ui*@
+@if (editingExpense != null)
+{
+	<h3>Edit Expense</h3>
+
+	<div>
+		<label>Description</label>
+		<input @bind="editingExpense.Description" />
+	</div>
+
+	<div>
+		<label>Amount</label>
+		<input type="number" step="0.01" @bind="editingExpense.Amount" />
+	</div>
+
+	<div>
+		<label>Category</label>
+		<input @bind="editingExpense.Category" />
+	</div>
+
+	<div>
+		<label>Date</label>
+		<input type="date" @bind="editingExpense.Date" />
+	</div>
+
+	<button @onclick="SaveChanges">Save Changes</button>
+	<button @onclick="CancelEdit">Cancel</button>
+}
 <table class="table">
 
 	<thead>
@@ -43,9 +72,11 @@
 			<th>Amount</th>
 			<th>Category</th>
 			<th>Date</th>
+			<th>Action</th>
 		</tr>
 	</thead>
 	<tbody>
+		@*display each exxpense in table*@
 		@foreach (var expense in expenses)
 		{
 			<tr>
@@ -53,6 +84,7 @@
 				<td>@expense.Amount.ToString("C")</td>
 				<td>@expense.Category</td>
 				<td>@expense.Date.ToShortDateString()</td>
+				<td><button @onclick="() => EditExpense(expense.Id)">Edit</button></td>
 			</tr>
 		}
 		
@@ -62,17 +94,23 @@
 @code {
 	private string errorMessage = "";
 
+	private int nextExpenseId = 3;
+	//null when not editing
+	private Expense? editingExpense;
+
 	private List<Expense> expenses = new()
 	{
 		new Expense
 		{
 			Description = "Coffee",
-			Amount = 1.88m
+			Amount = 1.88m,
+			Id = 1
 		},
 		new Expense
 		{
 			Description = "Junior Chicken",
-			Amount = 3.50m
+			Amount = 3.50m,
+			Id = 2
 		}
 	};
 
@@ -94,6 +132,9 @@
 		{
 			newExpense.Category = "Uncategorized";
 		}
+
+		newExpense.Id = nextExpenseId;
+		nextExpenseId++;
 		//reset
 		errorMessage = "";
 		expenses.Add(newExpense);
@@ -102,5 +143,56 @@
 		{
 			Date = DateTime.Today
 		};
+	}
+
+	private void EditExpense(int id)
+	{
+		//LINQ
+		//firstOrDefualt: searches collection and returns first element that satisfies conditon, null otherwise
+		//e => e.Id == id: lamdba expr, for each expense, check if e.Id matches id
+		var expense = expenses.FirstOrDefault(e => e.Id == id);
+
+		if(expense != null)
+		{
+			//creates temp copy
+			editingExpense = new Expense
+				{
+					Id = expense.Id,
+					Description = expense.Description,
+					Amount = expense.Amount,
+					Category = expense.Category,
+					Date = expense.Date
+
+				};
+		}
+	}
+
+	private void SaveChanges()
+	{
+		if(editingExpense == null)
+		{
+			return;
+		}
+
+		//find that expense in the list matching the id(can maybe make more efficient? in huge dddataset we'd be looking twice)
+		var expense = expenses.FirstOrDefault(e => e.Id == editingExpense.Id);
+
+		//if that expense exists
+		if(expense != null)
+		{
+			expense.Description = editingExpense.Description;
+			expense.Amount = editingExpense.Amount;
+			expense.Category = editingExpense.Category;
+			expense.Date = editingExpense.Date;
+		}
+
+		//reset to null
+		editingExpense = null;
+	}
+
+	private void CancelEdit()
+	{
+		//since the edit screen only shows when !=null, setting =null will remove it without saving changes
+		editingExpense = null;
 	}
 }
