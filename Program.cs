@@ -1,6 +1,8 @@
 using ExpenseTracker.Components;
+using ExpenseTracker.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddScoped<ExpenseService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

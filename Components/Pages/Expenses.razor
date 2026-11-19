@@ -1,5 +1,7 @@
 ﻿@page "/expenses"
+@using ExpenseTracker.Services
 @using ExpenseTracker.Models
+@inject ExpenseService ExpenseService
 
 <PageTitle>Expenses</PageTitle>
 
@@ -108,21 +110,13 @@
 	//null when not editing
 	private Expense? editingExpense;
 
-	private List<Expense> expenses = new()
+	private List<Expense> expenses = new();
+
+	protected override void OnInitialized()
 	{
-		new Expense
-		{
-			Description = "Coffee",
-			Amount = 1.88m,
-			Id = 1
-		},
-		new Expense
-		{
-			Description = "Junior Chicken",
-			Amount = 3.50m,
-			Id = 2
-		}
-	};
+		expenses = ExpenseService.GetExpenses();
+	}
+
 
 	private Expense newExpense = new()
 	{
@@ -147,7 +141,7 @@
 		nextExpenseId++;
 		//reset
 		errorMessage = "";
-		expenses.Add(newExpense);
+		ExpenseService.AddExpense(newExpense);
 
 		newExpense = new Expense
 		{
@@ -184,17 +178,8 @@
 			return;
 		}
 
-		//find that expense in the list matching the id(can maybe make more efficient? in huge dddataset we'd be looking twice)
-		var expense = expenses.FirstOrDefault(e => e.Id == editingExpense.Id);
 
-		//if that expense exists
-		if(expense != null)
-		{
-			expense.Description = editingExpense.Description;
-			expense.Amount = editingExpense.Amount;
-			expense.Category = editingExpense.Category;
-			expense.Date = editingExpense.Date;
-		}
+		ExpenseService.UpdateExpense(editingExpense);
 
 		//reset to null
 		editingExpense = null;
@@ -222,7 +207,7 @@
 		if (confirmed)
 		{
 			//remove all from expenses with matching id (unique ids)
-			expenses.RemoveAll(e => e.Id == id);
+			ExpenseService.DeleteExpense(id);
 		}
 
 			
